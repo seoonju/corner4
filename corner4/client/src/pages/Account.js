@@ -31,7 +31,7 @@ const Account = () => {
   };
 
   const validatePassword = (value) => {
-    const passwordRegex = /^[a-zA-Z\d!@*&-_]{8,16}$/;
+    const passwordRegex = /^[a-zA-Z0-9!@*&-_]{8,16}$/; // Adjusted regex to avoid overlap
     if (!value) return "비밀번호를 입력해주세요.";
     if (!passwordRegex.test(value)) return "비밀번호는 8~16자의 영문, 숫자, 특수문자(!@*&-_)만 가능합니다.";
     return "";

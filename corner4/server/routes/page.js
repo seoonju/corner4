@@ -1,6 +1,7 @@
 const express = require('express');
 const { renderProfile, renderJoin, renderMain } = require('../controllers/page');
 const { isLoggedIn, isNotLoggedIn } = require('../middlewares');
+const rateLimit = require('express-rate-limit');
 
 const router = express.Router();
 
@@ -39,7 +40,12 @@ router.use((req, res, next) => {
 //     }
 //   });
 
-router.get('/users', (req, res) => {
+const usersRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
+});
+
+router.get('/users', usersRateLimiter, (req, res) => {
     User.findAll()
       .then(users => {
         console.log(users);  // 여기서 출력되는 데이터를 확인
@@ -60,4 +66,3 @@ router.get('/join', isNotLoggedIn, renderJoin);
 router.get('/', renderMain);
 
 module.exports = router;
-

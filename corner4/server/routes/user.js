@@ -11,6 +11,7 @@
 
 
 const express = require('express');
+const rateLimit = require('express-rate-limit'); // Import rate limiting middleware
 
 const { isLoggedIn } = require('../middlewares');
 const { follow } = require('../controllers/user');
@@ -18,8 +19,14 @@ const { User } = require('../models');
 
 const router = express.Router();
 
+// Rate limiter middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+
 // POST /user/:id/follow
-router.post('/:id/follow', isLoggedIn, follow);
+router.post('/:id/follow', isLoggedIn, limiter, follow);
 
 // 닉네임 목록 뜨게
 // router.get('/mypage', isLoggedIn, async (req, res, next) => {
@@ -39,7 +46,7 @@ router.post('/:id/follow', isLoggedIn, follow);
 
 // 모든 사용자 목록 조회 (로그인한 경우에만 접근 가능)
 
-router.get('/list', isLoggedIn, async (req, res, next) => {
+router.get('/list', isLoggedIn, limiter, async (req, res, next) => {
   try {
     const users = await User.findAll();  // User 테이블에서 모든 사용자 조회
     res.render('layout', {  // layout.html 템플릿에 users 배열 전달
