@@ -60,7 +60,10 @@ app.use(session({
   secret: process.env.COOKIE_SECRET,
   cookie: {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    domain: 'example.com', // Set your domain
+    path: '/', // Set the cookie path
+    expires: new Date(Date.now() + 60 * 60 * 1000), // Set cookie expiration time
   },
   name: 'session-cookie',
 }));
@@ -127,6 +130,10 @@ const fs = require('fs');
 
 app.get('/:page', (req, res) => {
   const page = req.params.page;
+  const allowedPages = ['home', 'about', 'contact']; // Whitelist of allowed pages
+  if (!allowedPages.includes(page)) {
+    return res.status(404).send('Page not found');
+  }
   const filePath = path.join(__dirname, 'views', `${page}.html`);
 
   fs.access(filePath, fs.constants.F_OK, (err) => {
